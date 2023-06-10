@@ -1,5 +1,6 @@
 package org.example;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 public class StringListImpl implements StringList {
@@ -7,7 +8,7 @@ public class StringListImpl implements StringList {
   private static final int DEFAULT_INITIAL_CAPACITY = 10;
 
 
-  private final String[] data;
+  private Integer[] data;
   private int size;
 
   public StringListImpl() {
@@ -15,19 +16,22 @@ public class StringListImpl implements StringList {
   }
 
   public StringListImpl(int initialCapacity) {
-    this.data = new String[initialCapacity];
+    this.data = new Integer[initialCapacity];
     this.size = 0;
   }
 
   @Override
-  public String add(String item) {
+  public Integer add(Integer item) {
     return add(size, item);
   }
 
   @Override
-  public String add(int index, String item) {
+  public Integer add(int index, Integer item) {
     checkItem(item);
     checkIndex(index, true);
+    if (size >= data.length) {
+      grow();
+    }
     if (size < data.length) {
       if (index < size) {
         System.arraycopy(data, index, data, index + 1, size - index);
@@ -39,24 +43,30 @@ public class StringListImpl implements StringList {
     }
   }
 
+  private void grow() {
+    Integer[] data = new Integer[(int) (this.data.length * 1.5)];
+    System.arraycopy(this.data, 0, data, 0, this.data.length);
+    this.data = data;
+  }
+
   @Override
-  public String set(int index, String item) {
+  public Integer set(int index, Integer item) {
     checkItem(item);
     checkIndex(index, false);
     return data[index] = item;
   }
 
   @Override
-  public String remove(String item) {
+  public Integer remove(Integer item) {
     checkItem(item);
     int indexForRemoving = indexOf(item);
     return remove(indexForRemoving);
   }
 
   @Override
-  public String remove(int index) {
+  public Integer remove(int index) {
     checkIndex(index, false);
-    String removed = data[index];
+    Integer removed = data[index];
     if (index < size - 1) {
       System.arraycopy(data, index + 1, data, index, size - index - 1);
     }
@@ -65,13 +75,44 @@ public class StringListImpl implements StringList {
   }
 
   @Override
-  public boolean contains(String item) {
+  public boolean contains(Integer item) {
     checkItem(item);
-    return indexOf(item) != -1;
+      Integer[] copy = Arrays.copyOf(data,size);
+      sortInsert(copy);
+      int min = 0;
+    int max = copy.length - 1;
+    while (min <= max) {
+      int mid = (min + max) / 2;
+      if (item.equals(copy[mid])) {
+        return true;
+      }
+      if (item < copy[mid]) {
+        max = mid - 1;
+      } else {
+        min = mid + 1;
+      }
+    }
+    return false;
   }
 
+
+    private void sortInsert(Integer[] arr){
+      for (int i=1; i<arr.length; i++){
+        int temp = arr [i];
+        int q = i;
+        while (q >0 && arr[q-1]>=temp){
+          arr[q] = arr [q-1];
+          q--;
+        }
+        arr[q]= temp;
+      }
+    }
+
+
+
+
   @Override
-  public int indexOf(String item) {
+  public int indexOf(Integer item) {
     checkItem(item);
     for (int i = 0; i < size; i++) {
       if (Objects.equals(item, data[i])) {
@@ -82,7 +123,7 @@ public class StringListImpl implements StringList {
   }
 
   @Override
-  public int lastIndexOf(String item) {
+  public int lastIndexOf(Integer item) {
     checkItem(item);
     for (int i = size - 1; i >= 0; i--) {
       if (Objects.equals(item, data[i])) {
@@ -93,7 +134,7 @@ public class StringListImpl implements StringList {
   }
 
   @Override
-  public String get(int index) {
+  public Integer get(int index) {
     checkIndex(index, false);
     return data[index];
   }
@@ -130,13 +171,13 @@ public class StringListImpl implements StringList {
   }
 
   @Override
-  public String[] toArray() {
-    String[] result = new String[size];
+  public Integer[] toArray() {
+    Integer[] result = new Integer[size];
     System.arraycopy(data, 0, result, 0, size);
     return result;
   }
 
-  private void checkItem(String item) {
+  private void checkItem(Integer item) {
     if (item == null) {
       throw new IllegalArgumentException("item не может быть null!");
     }
@@ -148,5 +189,4 @@ public class StringListImpl implements StringList {
       throw new IllegalArgumentException("Выход индекса за границы!");
     }
   }
-
 }
