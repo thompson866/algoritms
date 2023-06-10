@@ -77,9 +77,11 @@ public class StringListImpl implements StringList {
   @Override
   public boolean contains(Integer item) {
     checkItem(item);
-      Integer[] copy = Arrays.copyOf(data,size);
-      sortInsert(copy);
-      int min = 0;
+
+    Integer[] copy = toArray();
+    quickSort(copy);
+
+    int min = 0;
     int max = copy.length - 1;
     while (min <= max) {
       int mid = (min + max) / 2;
@@ -95,21 +97,39 @@ public class StringListImpl implements StringList {
     return false;
   }
 
+  private void quickSort(Integer[] arr) {
+    quickSort(arr, 0, arr.length - 1);
+  }
 
-    private void sortInsert(Integer[] arr){
-      for (int i=1; i<arr.length; i++){
-        int temp = arr [i];
-        int q = i;
-        while (q >0 && arr[q-1]>=temp){
-          arr[q] = arr [q-1];
-          q--;
-        }
-        arr[q]= temp;
+  private void quickSort(Integer[] arr, int begin, int end) {
+    if (begin < end) {
+      int partitionIndex = partition(arr, begin, end);
+
+      quickSort(arr, begin, partitionIndex - 1);
+      quickSort(arr, partitionIndex + 1, end);
+    }
+  }
+
+  private int partition(Integer[] arr, int begin, int end) {
+    Integer pivot = arr[end];
+    int i = (begin - 1);
+
+    for (int j = begin; j < end; j++) {
+      if (arr[j] <= pivot) {
+        i++;
+        swap(arr, i, j);
       }
     }
 
+    swap(arr, i + 1, end);
+    return i + 1;
+  }
 
-
+  private void swap(Integer[] arr, int left, int right) {
+    Integer temp = arr[left];
+    arr[left] = arr[right];
+    arr[right] = temp;
+  }
 
   @Override
   public int indexOf(Integer item) {
